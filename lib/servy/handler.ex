@@ -57,8 +57,27 @@ defmodule Servy.Handler do
     %{conn | status: 403, resp_body: "Deleting a bear is forbidden!"}
   end
 
+  defp route(%{method: "GET", path: "/about"} = conn) do
+    Path.expand("../../pages", __DIR__)
+    |> Path.join("about.html")
+    |> File.read()
+    |> handle_file(conn)
+  end
+
   defp route(%{method: "GET", path: path} = conn) do
     %{conn | status: 404, resp_body: "No #{path} here!"}
+  end
+
+  defp handle_file({:ok, content}, conn) do
+    %{conn | status: 200, resp_body: content}
+  end
+
+  defp handle_file({:error, :enoent}, conn) do
+    %{conn | status: 404, resp_body: "File not found!"}
+  end
+
+  defp handle_file({:error, reason}, conn) do
+    %{conn | status: 500, resp_body: "File error: #{reason}"}
   end
 
   defp track(%{status: 404, path: path} = conn) do
@@ -164,6 +183,18 @@ IO.puts(response)
 
 request = """
 DELETE /bears/1 HTTP/1.1
+Host: example.com
+User-Agent: ExampleBrowser/1.0
+Accept: */*
+
+"""
+
+response = Servy.Handler.call(request)
+
+IO.puts(response)
+
+request = """
+GET /about HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
