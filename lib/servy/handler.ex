@@ -1,8 +1,13 @@
 defmodule Servy.Handler do
+  require Logger
+
   def call(conn) do
     conn
     |> parse()
+    |> IO.inspect()
+    |> rewrite_path()
     |> route()
+    |> track()
     |> format_response()
   end
 
@@ -16,6 +21,22 @@ defmodule Servy.Handler do
     %{method: method, path: path, resp_body: "", status: nil}
   end
 
+  defp rewrite_path(%{path: "/wildlife"} = conn) do
+    %{conn | path: "/wildthings"}
+  end
+
+  defp rewrite_path(%{path: path} = conn) do
+    ~r{\/(?<thing>\w+)\?id=(?<id>\d+)}
+    |> Regex.named_captures(path)
+    |> rewrite_path_captures(conn)
+  end
+
+  defp rewrite_path_captures(%{"thing" => thing, "id" => id}, conn) do
+    %{conn | path: "/#{thing}/#{id}"}
+  end
+
+  defp rewrite_path_captures(nil, conn), do: conn
+
   defp route(%{method: "GET", path: "/wildthings"} = conn) do
     %{conn | status: 200, resp_body: "Bears, Lions, Tigers"}
   end
@@ -28,6 +49,10 @@ defmodule Servy.Handler do
     %{conn | status: 200, resp_body: "Bear #{id}"}
   end
 
+  defp route(%{method: "GET", path: "/tigers/" <> id} = conn) do
+    %{conn | status: 200, resp_body: "Tiger #{id}"}
+  end
+
   defp route(%{method: "DELETE", path: "/bears/" <> _id} = conn) do
     %{conn | status: 403, resp_body: "Deleting a bear is forbidden!"}
   end
@@ -35,6 +60,13 @@ defmodule Servy.Handler do
   defp route(%{method: "GET", path: path} = conn) do
     %{conn | status: 404, resp_body: "No #{path} here!"}
   end
+
+  defp track(%{status: 404, path: path} = conn) do
+    Logger.warn("Warning: #{path} is on the loose!")
+    conn
+  end
+
+  defp track(conn), do: conn
 
   defp format_response(conn) do
     """
@@ -71,6 +103,18 @@ response = Servy.Handler.call(request)
 IO.puts(response)
 
 request = """
+GET /wildlife HTTP/1.1
+Host: example.com
+User-Agent: ExampleBrowser/1.0
+Accept: */*
+
+"""
+
+response = Servy.Handler.call(request)
+
+IO.puts(response)
+
+request = """
 GET /bears HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
@@ -84,6 +128,30 @@ IO.puts(response)
 
 request = """
 GET /bears/1 HTTP/1.1
+Host: example.com
+User-Agent: ExampleBrowser/1.0
+Accept: */*
+
+"""
+
+response = Servy.Handler.call(request)
+
+IO.puts(response)
+
+request = """
+GET /bears?id=1 HTTP/1.1
+Host: example.com
+User-Agent: ExampleBrowser/1.0
+Accept: */*
+
+"""
+
+response = Servy.Handler.call(request)
+
+IO.puts(response)
+
+request = """
+GET /tigers?id=1 HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
