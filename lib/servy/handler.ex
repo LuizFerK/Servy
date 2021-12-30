@@ -27,6 +27,11 @@ defmodule Servy.Handler do
     %{conn | status: 200, resp_body: "Bear #{id}"}
   end
 
+  defp route(%Conn{method: "POST", path: "/bears", params: params} = conn) do
+    IO.inspect(conn)
+    %{conn | status: 201, resp_body: "Create a #{params["type"]} bear named #{params["name"]}!"}
+  end
+
   defp route(%Conn{method: "GET", path: "/tigers/" <> id} = conn) do
     %{conn | status: 200, resp_body: "Tiger #{id}"}
   end
@@ -171,6 +176,21 @@ Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
 
+"""
+
+response = Servy.Handler.call(request)
+
+IO.puts(response)
+
+request = """
+POST /bears HTTP/1.1
+Host: example.com
+User-Agent: ExampleBrowser/1.0
+Accept: */*
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 21
+
+name=Baloo&type=Brown
 """
 
 response = Servy.Handler.call(request)

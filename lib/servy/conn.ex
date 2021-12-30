@@ -1,5 +1,10 @@
 defmodule Servy.Conn do
-  defstruct method: "", path: "", resp_body: "", status: nil
+  defstruct method: "",
+            path: "",
+            params: %{},
+            headers: %{},
+            resp_body: "",
+            status: nil
 
   def full_status(%__MODULE__{} = conn) do
     "#{conn.status} #{status_reason(conn.status)}"
