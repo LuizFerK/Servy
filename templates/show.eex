@@ -1,0 +1,4 @@
+<h1>Show item</h1>
+<p>
+Is <%= item.name %> in stock? <strong><%= item.in_stock %></strong>
+</p>
