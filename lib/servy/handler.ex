@@ -1,7 +1,7 @@
 defmodule Servy.Handler do
   @moduledoc "Handle HTTP requests."
 
-  alias Servy.{Conn, Parser, Plugins}
+  alias Servy.{Conn, ItemsController, Parser, Plugins}
 
   @pages_path Path.expand("../../pages", __DIR__)
 
@@ -20,20 +20,20 @@ defmodule Servy.Handler do
   end
 
   defp route(%Conn{method: "GET", path: "/items"} = conn) do
-    %{conn | status: 200, resp_body: "Item 1, Item 2, Item 3"}
+    ItemsController.index(conn)
   end
 
   defp route(%Conn{method: "GET", path: "/items/" <> id} = conn) do
-    %{conn | status: 200, resp_body: "Item #{id}"}
+    params = Map.put(conn.params, "id", id)
+    ItemsController.show(conn, params)
   end
 
   defp route(%Conn{method: "POST", path: "/items", params: params} = conn) do
-    IO.inspect(conn)
-    %{conn | status: 201, resp_body: "Create a #{params["type"]} item named #{params["name"]}!"}
+    ItemsController.create(conn, params)
   end
 
   defp route(%Conn{method: "DELETE", path: "/items/" <> _id} = conn) do
-    %{conn | status: 403, resp_body: "Deleting an item is forbidden!"}
+    ItemsController.delete(conn)
   end
 
   defp route(%Conn{method: "GET", path: "/orders/" <> id} = conn) do
@@ -190,7 +190,7 @@ Accept: */*
 Content-Type: application/x-www-form-urlencoded
 Content-Length: 21
 
-name=Item 4&type=red
+name=Item 4&color=red
 """
 
 response = Servy.Handler.call(request)
