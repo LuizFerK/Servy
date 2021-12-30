@@ -3,8 +3,8 @@ defmodule Servy.Plugins do
 
   alias Servy.Conn
 
-  def rewrite_path(%Conn{path: "/wildlife"} = conn) do
-    %Conn{conn | path: "/wildthings"}
+  def rewrite_path(%Conn{path: "/all"} = conn) do
+    %Conn{conn | path: "/"}
   end
 
   def rewrite_path(%Conn{path: path} = conn) do

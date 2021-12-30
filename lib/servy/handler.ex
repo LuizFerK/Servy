@@ -15,29 +15,29 @@ defmodule Servy.Handler do
     |> format_response()
   end
 
-  defp route(%Conn{method: "GET", path: "/wildthings"} = conn) do
-    %{conn | status: 200, resp_body: "Bears, Lions, Tigers"}
+  defp route(%Conn{method: "GET", path: "/"} = conn) do
+    %{conn | status: 200, resp_body: "Users, Items, Orders"}
   end
 
-  defp route(%Conn{method: "GET", path: "/bears"} = conn) do
-    %{conn | status: 200, resp_body: "Teddy, Smokey, Paddington"}
+  defp route(%Conn{method: "GET", path: "/items"} = conn) do
+    %{conn | status: 200, resp_body: "Item 1, Item 2, Item 3"}
   end
 
-  defp route(%Conn{method: "GET", path: "/bears/" <> id} = conn) do
-    %{conn | status: 200, resp_body: "Bear #{id}"}
+  defp route(%Conn{method: "GET", path: "/items/" <> id} = conn) do
+    %{conn | status: 200, resp_body: "Item #{id}"}
   end
 
-  defp route(%Conn{method: "POST", path: "/bears", params: params} = conn) do
+  defp route(%Conn{method: "POST", path: "/items", params: params} = conn) do
     IO.inspect(conn)
-    %{conn | status: 201, resp_body: "Create a #{params["type"]} bear named #{params["name"]}!"}
+    %{conn | status: 201, resp_body: "Create a #{params["type"]} item named #{params["name"]}!"}
   end
 
-  defp route(%Conn{method: "GET", path: "/tigers/" <> id} = conn) do
-    %{conn | status: 200, resp_body: "Tiger #{id}"}
+  defp route(%Conn{method: "DELETE", path: "/items/" <> _id} = conn) do
+    %{conn | status: 403, resp_body: "Deleting an item is forbidden!"}
   end
 
-  defp route(%Conn{method: "DELETE", path: "/bears/" <> _id} = conn) do
-    %{conn | status: 403, resp_body: "Deleting a bear is forbidden!"}
+  defp route(%Conn{method: "GET", path: "/orders/" <> id} = conn) do
+    %{conn | status: 200, resp_body: "Order #{id}"}
   end
 
   defp route(%Conn{method: "GET", path: "/about"} = conn) do
@@ -75,7 +75,7 @@ defmodule Servy.Handler do
 end
 
 request = """
-GET /wildthings HTTP/1.1
+GET / HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
@@ -87,7 +87,7 @@ response = Servy.Handler.call(request)
 IO.puts(response)
 
 request = """
-GET /wildlife HTTP/1.1
+GET /all HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
@@ -99,7 +99,7 @@ response = Servy.Handler.call(request)
 IO.puts(response)
 
 request = """
-GET /bears HTTP/1.1
+GET /items HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
@@ -111,7 +111,7 @@ response = Servy.Handler.call(request)
 IO.puts(response)
 
 request = """
-GET /bears/1 HTTP/1.1
+GET /items/1 HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
@@ -123,7 +123,7 @@ response = Servy.Handler.call(request)
 IO.puts(response)
 
 request = """
-GET /bears?id=1 HTTP/1.1
+GET /items?id=1 HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
@@ -135,7 +135,7 @@ response = Servy.Handler.call(request)
 IO.puts(response)
 
 request = """
-GET /tigers?id=1 HTTP/1.1
+DELETE /items/1 HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
@@ -147,7 +147,7 @@ response = Servy.Handler.call(request)
 IO.puts(response)
 
 request = """
-DELETE /bears/1 HTTP/1.1
+GET /orders?id=1 HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
@@ -171,7 +171,7 @@ response = Servy.Handler.call(request)
 IO.puts(response)
 
 request = """
-GET /bigfoot HTTP/1.1
+GET /invalid HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
@@ -183,14 +183,14 @@ response = Servy.Handler.call(request)
 IO.puts(response)
 
 request = """
-POST /bears HTTP/1.1
+POST /items HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
 Content-Type: application/x-www-form-urlencoded
 Content-Length: 21
 
-name=Baloo&type=Brown
+name=Item 4&type=red
 """
 
 response = Servy.Handler.call(request)
