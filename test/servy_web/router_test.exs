@@ -3,6 +3,37 @@ defmodule ServyWeb.RouterTest do
 
   import ServyWeb.Router, only: [call: 1]
 
+  test "GET /api/items" do
+    request = """
+    GET /api/items HTTP/1.1\r
+    Host: example.com\r
+    User-Agent: ExampleBrowser/1.0\r
+    Accept: */*\r
+    \r
+    """
+
+    response = call(request)
+
+    expected_response = """
+    HTTP/1.1 200 OK\r
+    Content-Type: application/json\r
+    Content-Length: 572\r
+    \r
+    [{"name":"Item1","in_stock":true,"id":1,"color":"red"},
+    {"name":"Item2","in_stock":true,"id":2,"color":"yellow"},
+    {"name":"Item3","in_stock":true,"id":3,"color":"green"},
+    {"name":"Item4","in_stock":true,"id":4,"color":"black"},
+    {"name":"Item5","in_stock":false,"id":5,"color":"white"},
+    {"name":"Item6","in_stock":false,"id":6,"color":"pink"},
+    {"name":"Item7","in_stock":true,"id":7,"color":"brown"},
+    {"name":"Item8","in_stock":true,"id":8,"color":"gray"},
+    {"name":"Item9","in_stock":true,"id":9,"color":"purple"},
+    {"name":"Item10","in_stock":true,"id":10,"color":"blue"}]
+    """
+
+    assert remove_whitespace(response) == remove_whitespace(expected_response)
+  end
+
   test "GET /" do
     request = """
     GET / HTTP/1.1\r
@@ -43,7 +74,6 @@ defmodule ServyWeb.RouterTest do
 
     <ul>
       <li>Item 1 - red</li>
-      <li>Item 10 - blue</li>
       <li>Item 2 - yellow</li>
       <li>Item 3 - green</li>
       <li>Item 4 - black</li>
@@ -52,6 +82,7 @@ defmodule ServyWeb.RouterTest do
       <li>Item 7 - brown</li>
       <li>Item 8 - gray</li>
       <li>Item 9 - purple</li>
+      <li>Item 10 - blue</li>
     </ul>
     """
 
