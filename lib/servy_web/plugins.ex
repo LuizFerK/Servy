@@ -20,7 +20,10 @@ defmodule ServyWeb.Plugins do
   defp rewrite_path_captures(nil, %Conn{} = conn), do: conn
 
   def track(%Conn{status: 404, path: path} = conn) do
-    Logger.warn("Warning: #{path} is on the loose!")
+    if Mix.env() != :test do
+      Logger.warn("Warning: #{path} is on the loose!")
+    end
+
     conn
   end
 

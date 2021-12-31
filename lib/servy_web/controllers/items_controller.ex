@@ -20,7 +20,7 @@ defmodule ServyWeb.ItemsController do
   def create(%Conn{} = conn, %{"name" => name, "color" => color}) do
     %Item{name: name, color: color} = Create.call(name, color)
 
-    %{conn | status: 201, resp_body: "Create a #{color} item named #{name}!"}
+    %{conn | status: 201, resp_body: "Created a #{color} item named #{name}!"}
   end
 
   def delete(%Conn{} = conn) do
