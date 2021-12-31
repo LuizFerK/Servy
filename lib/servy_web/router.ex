@@ -5,9 +5,9 @@ defmodule ServyWeb.Router do
 
   alias ServyWeb.{
     AboutController,
+    IndexController,
     ItemsController,
-    OrdersController,
-    IndexController
+    OrdersController
   }
 
   @doc "Transforms the request into a response."
@@ -53,6 +53,10 @@ defmodule ServyWeb.Router do
   defp route(%Conn{method: "GET", path: "/orders/" <> id} = conn) do
     params = Map.put(conn.params, "id", id)
     OrdersController.show(conn, params)
+  end
+
+  defp route(%Conn{method: "GET", path: "/api/users"} = conn) do
+    Api.UsersController.index(conn)
   end
 
   defp route(%Conn{method: "GET", path: "/about"} = conn) do
