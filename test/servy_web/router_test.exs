@@ -3,6 +3,29 @@ defmodule ServyWeb.RouterTest do
 
   import ServyWeb.Router, only: [call: 1]
 
+  test "POST /api/items" do
+    request = """
+    POST /api/items HTTP/1.1\r
+    Host: example.com\r
+    User-Agent: ExampleBrowser/1.0\r
+    Accept: */*\r
+    Content-Type: application/json\r
+    Content-Length: 21\r
+    \r
+    {"name": "Item 20", "color": "black"}
+    """
+
+    response = call(request)
+
+    assert response == """
+           HTTP/1.1 201 Created\r
+           Content-Type: text/html\r
+           Content-Length: 35\r
+           \r
+           Created a black item named Item 20!
+           """
+  end
+
   test "GET /api/items" do
     request = """
     GET /api/items HTTP/1.1\r

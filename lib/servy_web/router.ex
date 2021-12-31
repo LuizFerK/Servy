@@ -42,6 +42,10 @@ defmodule ServyWeb.Router do
     ItemsController.create(conn, params)
   end
 
+  defp route(%Conn{method: "POST", path: "/api/items", params: params} = conn) do
+    Api.ItemsController.create(conn, params)
+  end
+
   defp route(%Conn{method: "DELETE", path: "/items/" <> _id} = conn) do
     ItemsController.delete(conn)
   end
