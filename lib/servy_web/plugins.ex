@@ -1,7 +1,7 @@
-defmodule Servy.Plugins do
+defmodule ServyWeb.Plugins do
   require Logger
 
-  alias Servy.Conn
+  alias ServyWeb.Conn
 
   def rewrite_path(%Conn{path: "/all"} = conn) do
     %Conn{conn | path: "/"}

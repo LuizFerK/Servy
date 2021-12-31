@@ -1,11 +1,11 @@
-defmodule Servy.ItemsController do
-  alias Servy.Conn
-  alias Servy.Items.GetAll, as: GetAllItems
-  alias Servy.Items.Get, as: GetItem
+defmodule ServyWeb.ItemsController do
+  alias ServyWeb.Conn
+  alias Servy.Item
+  alias Servy.Items.{Create, Get, GetAll}
 
-  @templates_path Path.expand("../../templates", __DIR__)
+  @templates_path Path.expand("../templates", __DIR__)
 
-  defp render(conn, template, bindings) do
+  defp render(%Conn{} = conn, template, bindings) do
     content =
       @templates_path
       |> Path.join(template)
@@ -16,19 +16,21 @@ defmodule Servy.ItemsController do
 
   def index(%Conn{} = conn) do
     items =
-      GetAllItems.call()
+      GetAll.call()
       |> Enum.sort(fn i1, i2 -> i1.name <= i2.name end)
 
     render(conn, "index.eex", items: items)
   end
 
   def show(%Conn{} = conn, %{"id" => id}) do
-    item = GetItem.call(id)
+    item = Get.call(id)
 
     render(conn, "show.eex", item: item)
   end
 
   def create(%Conn{} = conn, %{"name" => name, "color" => color}) do
+    %Item{name: name, color: color} = Create.call(name, color)
+
     %{conn | status: 201, resp_body: "Create a #{color} item named #{name}!"}
   end
 

@@ -1,4 +1,4 @@
-defmodule Servy.Conn do
+defmodule ServyWeb.Conn do
   defstruct method: "",
             path: "",
             params: %{},

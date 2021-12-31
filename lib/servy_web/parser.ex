@@ -1,5 +1,5 @@
-defmodule Servy.Parser do
-  alias Servy.Conn
+defmodule ServyWeb.Parser do
+  alias ServyWeb.Conn
 
   def call(conn) do
     [top, params_string] = String.split(conn, "\n\n")

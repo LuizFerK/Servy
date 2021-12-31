@@ -1,9 +1,14 @@
-defmodule Servy.Handler do
+defmodule ServyWeb.Router do
   @moduledoc "Handle HTTP requests."
 
-  alias Servy.{Conn, ItemsController, Parser, Plugins}
+  alias ServyWeb.{Conn, Parser, Plugins}
 
-  @pages_path Path.expand("../../pages", __DIR__)
+  alias ServyWeb.{
+    AboutController,
+    ItemsController,
+    OrdersController,
+    IndexController
+  }
 
   @doc "Transforms the request into a response."
   def call(request) do
@@ -16,7 +21,7 @@ defmodule Servy.Handler do
   end
 
   defp route(%Conn{method: "GET", path: "/"} = conn) do
-    %{conn | status: 200, resp_body: "Users, Items, Orders"}
+    IndexController.index(conn)
   end
 
   defp route(%Conn{method: "GET", path: "/items"} = conn) do
@@ -37,30 +42,16 @@ defmodule Servy.Handler do
   end
 
   defp route(%Conn{method: "GET", path: "/orders/" <> id} = conn) do
-    %{conn | status: 200, resp_body: "Order #{id}"}
+    params = Map.put(conn.params, "id", id)
+    OrdersController.show(conn, params)
   end
 
   defp route(%Conn{method: "GET", path: "/about"} = conn) do
-    @pages_path
-    |> Path.join("about.html")
-    |> File.read()
-    |> handle_file(conn)
+    AboutController.index(conn)
   end
 
   defp route(%Conn{method: "GET", path: path} = conn) do
     %{conn | status: 404, resp_body: "No #{path} here!"}
-  end
-
-  defp handle_file({:ok, content}, %Conn{} = conn) do
-    %{conn | status: 200, resp_body: content}
-  end
-
-  defp handle_file({:error, :enoent}, %Conn{} = conn) do
-    %{conn | status: 404, resp_body: "File not found!"}
-  end
-
-  defp handle_file({:error, reason}, %Conn{} = conn) do
-    %{conn | status: 500, resp_body: "File error: #{reason}"}
   end
 
   defp format_response(%Conn{} = conn) do
@@ -82,7 +73,7 @@ Accept: */*
 
 """
 
-response = Servy.Handler.call(request)
+response = ServyWeb.Router.call(request)
 
 IO.puts(response)
 
@@ -94,7 +85,7 @@ Accept: */*
 
 """
 
-response = Servy.Handler.call(request)
+response = ServyWeb.Router.call(request)
 
 IO.puts(response)
 
@@ -106,7 +97,7 @@ Accept: */*
 
 """
 
-response = Servy.Handler.call(request)
+response = ServyWeb.Router.call(request)
 
 IO.puts(response)
 
@@ -118,7 +109,7 @@ Accept: */*
 
 """
 
-response = Servy.Handler.call(request)
+response = ServyWeb.Router.call(request)
 
 IO.puts(response)
 
@@ -130,7 +121,7 @@ Accept: */*
 
 """
 
-response = Servy.Handler.call(request)
+response = ServyWeb.Router.call(request)
 
 IO.puts(response)
 
@@ -142,7 +133,7 @@ Accept: */*
 
 """
 
-response = Servy.Handler.call(request)
+response = ServyWeb.Router.call(request)
 
 IO.puts(response)
 
@@ -154,7 +145,7 @@ Accept: */*
 
 """
 
-response = Servy.Handler.call(request)
+response = ServyWeb.Router.call(request)
 
 IO.puts(response)
 
@@ -166,7 +157,7 @@ Accept: */*
 
 """
 
-response = Servy.Handler.call(request)
+response = ServyWeb.Router.call(request)
 
 IO.puts(response)
 
@@ -178,7 +169,7 @@ Accept: */*
 
 """
 
-response = Servy.Handler.call(request)
+response = ServyWeb.Router.call(request)
 
 IO.puts(response)
 
@@ -193,6 +184,6 @@ Content-Length: 21
 name=Item 4&color=red
 """
 
-response = Servy.Handler.call(request)
+response = ServyWeb.Router.call(request)
 
 IO.puts(response)
