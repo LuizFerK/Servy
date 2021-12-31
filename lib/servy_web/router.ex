@@ -1,7 +1,7 @@
 defmodule ServyWeb.Router do
   @moduledoc "Handle HTTP requests."
 
-  alias ServyWeb.{Conn, Parser, Plugins}
+  alias ServyWeb.{Api, Conn, Parser, Plugins}
 
   alias ServyWeb.{
     AboutController,
@@ -26,6 +26,10 @@ defmodule ServyWeb.Router do
 
   defp route(%Conn{method: "GET", path: "/items"} = conn) do
     ItemsController.index(conn)
+  end
+
+  defp route(%Conn{method: "GET", path: "/api/items"} = conn) do
+    Api.ItemsController.index(conn)
   end
 
   defp route(%Conn{method: "GET", path: "/items/" <> id} = conn) do
@@ -57,7 +61,7 @@ defmodule ServyWeb.Router do
   defp format_response(%Conn{} = conn) do
     """
     HTTP/1.1 #{Conn.full_status(conn)}\r
-    Content-Type: text/html\r
+    Content-Type: #{conn.resp_content_type}\r
     Content-Length: #{byte_size(conn.resp_body)}\r
     \r
     #{conn.resp_body}

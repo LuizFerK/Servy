@@ -4,9 +4,7 @@ defmodule ServyWeb.ItemsController do
   alias ServyWeb.{Conn, ItemView}
 
   def index(%Conn{} = conn) do
-    items =
-      GetAll.call()
-      |> Enum.sort(fn i1, i2 -> i1.name <= i2.name end)
+    items = GetAll.call()
 
     %{conn | status: 200, resp_body: ItemView.index(items)}
   end
