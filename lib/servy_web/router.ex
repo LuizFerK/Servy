@@ -59,6 +59,15 @@ defmodule ServyWeb.Router do
     AboutController.index(conn)
   end
 
+  defp route(%Conn{method: "GET", path: "/hibernate/" <> time} = conn) do
+    time |> String.to_integer() |> :timer.sleep()
+    %{conn | status: 200, resp_body: "Awake!"}
+  end
+
+  defp route(%Conn{method: "GET", path: "/kaboom"}) do
+    raise "Kaboom!"
+  end
+
   defp route(%Conn{method: "GET", path: path} = conn) do
     %{conn | status: 404, resp_body: "No #{path} here!"}
   end

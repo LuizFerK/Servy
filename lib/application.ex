@@ -30,7 +30,7 @@ defmodule Servy.Application do
     {:ok, client_socket} = :gen_tcp.accept(listen_socket)
 
     # Receives the request and sends a response over the client socket.
-    serve(client_socket)
+    spawn(fn -> serve(client_socket) end)
 
     # Loop back to wait and accept the next connection.
     accept_loop(listen_socket)
@@ -41,6 +41,8 @@ defmodule Servy.Application do
   sends a response back over the same socket.
   """
   def serve(client_socket) do
+    IO.puts("#{inspect(self())} working on it:")
+
     client_socket
     |> read_request
     |> Router.call()
