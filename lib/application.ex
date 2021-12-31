@@ -16,7 +16,7 @@ defmodule Servy.Application do
     # `active: false` - receive data when we're ready by calling `:gen_tcp.recv/2`
     # `reuseaddr: true` - allows reusing the address if the listener crashes
 
-    IO.puts("Server listening on port #{port}...\n")
+    logger(fn -> IO.puts("Server listening on port #{port}...\n") end)
 
     accept_loop(listen_socket)
   end
@@ -43,7 +43,7 @@ defmodule Servy.Application do
   sends a response back over the same socket.
   """
   def serve(client_socket) do
-    IO.puts("#{inspect(self())} working on it:")
+    logger(fn -> IO.puts("#{inspect(self())} working on it:") end)
 
     client_socket
     |> read_request
@@ -57,7 +57,8 @@ defmodule Servy.Application do
   def read_request(client_socket) do
     # 0 means "all available bytes"
     {:ok, request} = :gen_tcp.recv(client_socket, 0)
-    IO.puts(request)
+
+    logger(fn -> IO.puts(request) end)
 
     request
   end
@@ -71,5 +72,11 @@ defmodule Servy.Application do
     # Closes the client socket, ending the connection.
     # Does not close the listen socket!
     :gen_tcp.close(client_socket)
+  end
+
+  defp logger(log) do
+    if Mix.env() != :test do
+      log.()
+    end
   end
 end
