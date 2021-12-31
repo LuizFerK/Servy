@@ -7,6 +7,8 @@ defmodule ServyWeb.Api.ItemsController do
       GetAll.call()
       |> Poison.encode!()
 
-    %{conn | status: 200, resp_content_type: "application/json", resp_body: items}
+    conn = Conn.put_resp_content_type(conn, "application/json")
+
+    %{conn | status: 200, resp_body: items}
   end
 end

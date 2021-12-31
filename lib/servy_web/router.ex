@@ -17,6 +17,7 @@ defmodule ServyWeb.Router do
     |> Plugins.rewrite_path()
     |> route()
     |> Plugins.track()
+    |> Conn.put_content_length()
     |> format_response()
   end
 
@@ -61,8 +62,7 @@ defmodule ServyWeb.Router do
   defp format_response(%Conn{} = conn) do
     """
     HTTP/1.1 #{Conn.full_status(conn)}\r
-    Content-Type: #{conn.resp_content_type}\r
-    Content-Length: #{byte_size(conn.resp_body)}\r
+    #{Conn.format_response_headers(conn)}
     \r
     #{conn.resp_body}
     """
