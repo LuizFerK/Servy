@@ -1,31 +1,20 @@
 defmodule ServyWeb.ItemsController do
-  alias ServyWeb.Conn
   alias Servy.Item
   alias Servy.Items.{Create, Get, GetAll}
-
-  @templates_path Path.expand("../templates", __DIR__)
-
-  defp render(%Conn{} = conn, template, bindings) do
-    content =
-      @templates_path
-      |> Path.join(template)
-      |> EEx.eval_file(bindings)
-
-    %{conn | status: 200, resp_body: content}
-  end
+  alias ServyWeb.{Conn, ItemView}
 
   def index(%Conn{} = conn) do
     items =
       GetAll.call()
       |> Enum.sort(fn i1, i2 -> i1.name <= i2.name end)
 
-    render(conn, "index.eex", items: items)
+    %{conn | status: 200, resp_body: ItemView.index(items)}
   end
 
   def show(%Conn{} = conn, %{"id" => id}) do
     item = Get.call(id)
 
-    render(conn, "show.eex", item: item)
+    %{conn | status: 200, resp_body: ItemView.show(item)}
   end
 
   def create(%Conn{} = conn, %{"name" => name, "color" => color}) do

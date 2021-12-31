@@ -1,7 +1,7 @@
 defmodule ServyWeb.AboutController do
   alias ServyWeb.Conn
 
-  @pages_path Path.expand("../../priv/pages", __DIR__)
+  @pages_path Path.expand("../../../priv/pages", __DIR__)
 
   def index(%Conn{} = conn) do
     @pages_path
