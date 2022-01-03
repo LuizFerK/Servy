@@ -2,9 +2,12 @@ defmodule Servy.Users.GetFromApi do
   alias Servy.User
 
   def call(id) do
-    api_url(id)
-    |> HTTPoison.get()
-    |> handle_response
+    {:ok, user} =
+      api_url(id)
+      |> HTTPoison.get()
+      |> handle_response
+
+    user
   end
 
   defp api_url(id) do
