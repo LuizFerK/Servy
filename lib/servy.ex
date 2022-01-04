@@ -1,5 +1,7 @@
 defmodule Servy do
-  def hello do
-    :world
+  use Application
+
+  def start(_type, _args) do
+    Servy.Supervisor.start_link()
   end
 end
