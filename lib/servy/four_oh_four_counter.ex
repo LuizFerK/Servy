@@ -1,63 +1,46 @@
 defmodule Servy.FourOhFourCounter do
-  @process_name :four_oh_four_server
+  alias Servy.GenericServer
+
+  @process_name :four_oh_four_counter
 
   # Client
-  def start(initial_state \\ %{}) do
+  def start do
     IO.puts("Starting the 404 counter server...")
-    pid = spawn(__MODULE__, :listen_loop, [initial_state])
-
-    Process.register(pid, @process_name)
-
-    pid
+    GenericServer.start(__MODULE__, %{}, @process_name)
   end
 
   def bump_count(path) do
-    send(@process_name, {self(), :bump_count, path})
-
-    receive do
-      {:status, status} -> status
-    end
-  end
-
-  def get_count(path) do
-    send(@process_name, {self(), :get_count, path})
-
-    receive do
-      {:count, count} -> count
-    end
+    GenericServer.call(@process_name, {:bump_count, path})
   end
 
   def get_counts do
-    send(@process_name, {self(), :get_counts})
-
-    receive do
-      {:state, state} -> state
-    end
+    GenericServer.call(@process_name, :get_counts)
   end
 
-  # Server
-  def listen_loop(state) do
-    receive do
-      {pid, :bump_count, path} ->
-        state = Map.update(state, path, 1, &(&1 + 1))
-        send(pid, {:status, "#{path} was called #{state[path]} times!"})
+  def get_count(path) do
+    GenericServer.call(@process_name, {:get_count, path})
+  end
 
-        listen_loop(state)
+  def reset do
+    GenericServer.cast(@process_name, :reset)
+  end
 
-      {pid, :get_count, path} ->
-        count = Map.get(state, path, 0)
-        send(pid, {:count, count})
+  # Server callbacks
+  def handle_call({:bump_count, path}, state) do
+    state = Map.update(state, path, 1, &(&1 + 1))
+    {:ok, state}
+  end
 
-        listen_loop(state)
+  def handle_call(:get_counts, state) do
+    {state, state}
+  end
 
-      {pid, :get_counts} ->
-        send(pid, {:state, state})
+  def handle_call({:get_count, path}, state) do
+    count = Map.get(state, path, 0)
+    {count, state}
+  end
 
-        listen_loop(state)
-
-      unexpected ->
-        IO.puts("Unexpected messaged: #{inspect(unexpected)}")
-        listen_loop(state)
-    end
+  def handle_cast(:reset, _state) do
+    %{}
   end
 end
