@@ -2,9 +2,9 @@ defmodule Servy.SubsServer do
   @process_name :sub_server
 
   # Client
-  def start do
+  def start(initial_state \\ []) do
     IO.puts("Starting the subs server...")
-    pid = spawn(__MODULE__, :listen_loop, [[]])
+    pid = spawn(__MODULE__, :listen_loop, [initial_state])
 
     Process.register(pid, @process_name)
 
