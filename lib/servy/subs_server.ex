@@ -1,84 +1,74 @@
-defmodule Servy.GenericServer do
-  def start(callback_module, initial_state, process_name) do
-    pid = spawn(__MODULE__, :listen_loop, [initial_state, callback_module])
-    Process.register(pid, process_name)
-    pid
-  end
-
-  def call(pid, message) do
-    send(pid, {:call, self(), message})
-
-    receive do
-      {:response, response} -> response
-    end
-  end
-
-  def cast(pid, message) do
-    send(pid, {:cast, message})
-  end
-
-  def listen_loop(state, callback_module) do
-    receive do
-      {:call, pid, message} when is_pid(pid) ->
-        {response, state} = callback_module.handle_call(message, state)
-        send(pid, {:response, response})
-        listen_loop(state, callback_module)
-
-      {:cast, message} ->
-        state = callback_module.handle_cast(message, state)
-        listen_loop(state, callback_module)
-
-      unexpected ->
-        IO.puts("Unexpected messaged: #{inspect(unexpected)}")
-        listen_loop(state, callback_module)
-    end
-  end
-end
-
 defmodule Servy.SubsServer do
-  alias Servy.GenericServer
+  use GenServer
 
-  @process_name :sub_server
+  @name :sub_server
+
+  defmodule State do
+    defstruct cache_size: 3, subs: []
+  end
 
   # Client
-  def start, do: GenericServer.start(__MODULE__, [], @process_name)
+  def start, do: GenServer.start(__MODULE__, %State{}, name: @name)
 
   def subscribe(name, amount) do
-    GenericServer.call(@process_name, {:subscribe, name, amount})
+    GenServer.call(@name, {:subscribe, name, amount})
   end
 
   def recent_subs do
-    GenericServer.call(@process_name, :recent_subs)
+    GenServer.call(@name, :recent_subs)
   end
 
   def total_sub do
-    GenericServer.call(@process_name, :total_sub)
+    GenServer.call(@name, :total_sub)
   end
 
   def clear do
-    GenericServer.cast(@process_name, :clear)
+    GenServer.cast(@name, :clear)
+  end
+
+  def set_cache_size(size) do
+    GenServer.cast(@name, {:set_cache_size, size})
   end
 
   # Server callbacks
-  def handle_call(:total_sub, state) do
-    total = Enum.map(state, &elem(&1, 1)) |> Enum.sum()
+  def init(state) do
+    cached_subs = fetch_recent_subs_from_service()
 
-    {total, state}
+    {:ok, %{state | subs: cached_subs}}
   end
 
-  def handle_call(:recent_subs, state), do: {state, state}
+  def handle_call(:total_sub, _, state) do
+    total = Enum.map(state.subs, &elem(&1, 1)) |> Enum.sum()
 
-  def handle_call({:subscribe, name, amount}, state) do
+    {:reply, total, state}
+  end
+
+  def handle_call(:recent_subs, _, state), do: {:reply, state.subs, state}
+
+  def handle_call({:subscribe, name, amount}, _, state) do
     {:ok, id} = send_sub_to_service(name, amount)
-    state = [{name, amount} | Enum.take(state, 2)]
+    cached_subs = [{name, amount} | Enum.take(state.subs, state.cache_size - 1)]
 
-    {id, state}
+    {:reply, id, %{state | subs: cached_subs}}
   end
 
-  def handle_cast(:clear, _state), do: []
+  def handle_cast(:clear, state), do: {:noreply, %{state | subs: []}}
 
-  def send_sub_to_service(_, _) do
+  def handle_cast({:set_cache_size, size}, state) do
+    {:noreply, %{state | cache_size: size}}
+  end
+
+  def handle_info(message, state) do
+    IO.puts("Unhandling message #{inspect(message)}")
+    {:noreply, state}
+  end
+
+  defp send_sub_to_service(_, _) do
     # simulation
     {:ok, "sub-#{:rand.uniform(1000)}"}
+  end
+
+  defp fetch_recent_subs_from_service do
+    [{"wilma", 15}, {"fred", 25}]
   end
 end
