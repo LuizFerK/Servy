@@ -1,4 +1,4 @@
-defmodule Servy.Application do
+defmodule Servy.Endpoint do
   alias ServyWeb.Router
 
   @doc """

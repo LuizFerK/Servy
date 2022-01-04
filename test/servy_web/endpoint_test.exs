@@ -1,7 +1,7 @@
-defmodule Servy.ApplicationTest do
+defmodule Servy.EndpointTest do
   use ExUnit.Case, async: true
 
-  alias Servy.Application, as: ServyApp
+  alias Servy.Endpoint, as: ServyApp
 
   test "accepts a request on a socket and sends back a response" do
     spawn(ServyApp, :start, [4000])
