@@ -1,6 +1,7 @@
 defmodule ServyWeb.Plugins do
   require Logger
 
+  alias Servy.FourOhFourCounter
   alias ServyWeb.Conn
 
   def rewrite_path(%Conn{path: "/all"} = conn) do
@@ -22,6 +23,7 @@ defmodule ServyWeb.Plugins do
   def track(%Conn{status: 404, path: path} = conn) do
     if Mix.env() != :test do
       Logger.warn("Warning: #{path} is on the loose!")
+      FourOhFourCounter.bump_count(path)
     end
 
     conn

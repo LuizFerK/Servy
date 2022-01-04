@@ -72,6 +72,12 @@ defmodule ServyWeb.Router do
     SubsController.create(conn, params)
   end
 
+  defp route(%Conn{method: "GET", path: "/404s"} = conn) do
+    counts = Servy.FourOhFourCounter.get_counts()
+
+    %{conn | status: 200, resp_body: inspect(counts)}
+  end
+
   defp route(%Conn{method: "GET", path: "/hibernate/" <> time} = conn) do
     time |> String.to_integer() |> :timer.sleep()
     %{conn | status: 200, resp_body: "Awake!"}
