@@ -1,13 +1,9 @@
 defmodule ServyWeb.Api.UsersController do
-  alias Servy.Users.GetFromApi
   alias ServyWeb.Conn
+  alias Servy.Users.Server
 
   def index(%Conn{} = conn) do
-    users =
-      1..3
-      |> Enum.map(&to_string/1)
-      |> Enum.map(&Task.async(GetFromApi, :call, [&1]))
-      |> Enum.map(&Task.await/1)
+    users = Server.get_users()
 
     conn = Conn.put_resp_content_type(conn, "application/json")
 
