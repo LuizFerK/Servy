@@ -55,7 +55,8 @@ defmodule Servy.SubsServer do
   def handle_cast(:clear, state), do: {:noreply, %{state | subs: []}}
 
   def handle_cast({:set_cache_size, size}, state) do
-    {:noreply, %{state | cache_size: size}}
+    cached_subs = Enum.take(state.subs, size)
+    {:noreply, %{state | cache_size: size, sub: cached_subs}}
   end
 
   def handle_info(message, state) do
