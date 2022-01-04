@@ -7,7 +7,8 @@ defmodule ServyWeb.Router do
     AboutController,
     IndexController,
     ItemsController,
-    OrdersController
+    OrdersController,
+    SubsController
   }
 
   @doc "Transforms the request into a response."
@@ -61,6 +62,14 @@ defmodule ServyWeb.Router do
 
   defp route(%Conn{method: "GET", path: "/about"} = conn) do
     AboutController.index(conn)
+  end
+
+  defp route(%Conn{method: "GET", path: "/subs"} = conn) do
+    SubsController.index(conn)
+  end
+
+  defp route(%Conn{method: "POST", path: "/subs", params: params} = conn) do
+    SubsController.create(conn, params)
   end
 
   defp route(%Conn{method: "GET", path: "/hibernate/" <> time} = conn) do
